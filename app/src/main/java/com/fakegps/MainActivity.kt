@@ -1,5 +1,6 @@
 package com.fakegps
 
+import android.Manifest
 import android.app.*
 import android.content.*
 import android.content.pm.*
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         lvSaved.onItemClickListener = AdapterView.OnItemClickListener { _, _, pos, _ ->
             val loc = savedLocations[pos]
             etLat.setText(loc.lat.toString())
-            etLon.setText(lon.toString())
+            etLon.setText(loc.lon.toString())
             Toast.makeText(this, "已加载: ${loc.name}", Toast.LENGTH_SHORT).show()
         }
 
