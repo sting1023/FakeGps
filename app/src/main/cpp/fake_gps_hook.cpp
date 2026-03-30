@@ -1,4 +1,5 @@
 // fake_gps_hook.cpp
+#include <poll.h>
 // Native 层 HOOK - 截获 libc socket 函数以实现定位劫持
 // HOOK 流程:
 // 1. Hook socket/connect/recvfrom/sendto
@@ -54,7 +55,7 @@ static ssize_t(*orig_send)(int, const void*, size_t, int) = nullptr;
 static ssize_t(*orig_recvfrom)(int, void*, size_t, int, struct sockaddr*, socklen_t*) = nullptr;
 static ssize_t(*orig_sendto)(int, const void*, size_t, int, const struct sockaddr*, socklen_t) = nullptr;
 static int   (*orig_select)(int, fd_set*, fd_set*, fd_set*, struct timeval*) = nullptr;
-static int   (*orig_poll)(struct pollfd*, nfds_t, int) = nullptr;
+static int   (*orig_poll)(struct pollfd*, int, int) = nullptr;
 
 // 被 HOOK 的目标 socket FD（与钉钉通信的）
 static int g_dingtalk_fd = -1;
@@ -445,13 +446,13 @@ static int do_install_hooks() {
     }
 
     // 解析所有需要的符号地址
-    orig_socket   = dlsym(RTLD_NEXT, "socket");
-    orig_connect  = dlsym(RTLD_NEXT, "connect");
-    orig_close    = dlsym(RTLD_NEXT, "close");
-    orig_recv     = dlsym(RTLD_NEXT, "recv");
-    orig_send     = dlsym(RTLD_NEXT, "send");
-    orig_recvfrom = dlsym(RTLD_NEXT, "recvfrom");
-    orig_sendto   = dlsym(RTLD_NEXT, "sendto");
+    orig_socket = (decltype(orig_socket))dlsym(RTLD_NEXT, "socket");
+    orig_connect = (decltype(orig_connect))dlsym(RTLD_NEXT, "connect");
+orig_close = (decltype(orig_close))dlsym(RTLD_NEXT, "close");
+    orig_recv = (decltype(orig_recv))dlsym(RTLD_NEXT, "recv");
+    orig_send = (decltype(orig_send))dlsym(RTLD_NEXT, "send");
+    orig_recvfrom = (decltype(orig_recvfrom))dlsym(RTLD_NEXT, "recvfrom");
+    orig_sendto = (decltype(orig_sendto))dlsym(RTLD_NEXT, "sendto");
 
     LOGI("Hooks ready (using inline hook on socket functions)");
     LOGI("Note: True inline hook requires NDK build environment");
