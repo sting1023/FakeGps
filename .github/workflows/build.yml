@@ -28,12 +28,29 @@ jobs:
           path: ~/.gradle/caches
           key: gradle-${{ hashFiles('**/*.gradle*') }}
 
-      - name: Build debug APK
+      - name: Pre-check
         run: |
+          set -e
+          echo "=== File info ==="
           ls -la gradlew gradle/wrapper/gradle-wrapper.jar
           file gradlew gradle/wrapper/gradle-wrapper.jar
-          java -version
-          bash gradlew assembleDebug --no-daemon --stacktrace
+          java -version 2>&1
+          echo "=== gradlew content (first 10 lines) ==="
+          head -10 gradlew
+
+      - name: Build debug APK
+        run: |
+          set -e
+          bash gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+        continue-on-error: true
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: failure() || success()
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 1
 
       - name: Upload APK
         if: success()
