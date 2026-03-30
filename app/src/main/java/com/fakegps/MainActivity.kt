@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         // 保存的位置列表文件（lazy避免提前访问filesDir）
         val savedFile: File
-            get() = File(filesDir, "saved_locations.json")
+            get() = File(applicationContext.filesDir, "saved_locations.json")
     }
 
     private lateinit var tvStatus: TextView
@@ -226,10 +226,10 @@ class MainActivity : AppCompatActivity() {
             settings.loadWithOverviewMode = true
 
             webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(msg: Message?) {
+                override fun onConsoleMessage(msg: ConsoleMessage?) {
                     // 处理地图 JS 回调
                     msg?.let {
-                        val text = it.message ?: return
+                        val text = msg.messageMessage ?: return
                         if (text.startsWith("LOCATION_CALLBACK:")) {
                             val parts = text.removePrefix("LOCATION_CALLBACK:").split(",")
                             if (parts.size == 2) {
@@ -487,8 +487,8 @@ class MainActivity : AppCompatActivity() {
             val view = cv ?: layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false)
             val loc = items[pos]
             (view as TextView).apply {
-                text1 = "📍 ${loc.name}"
-                text2 = "${loc.lat}, ${loc.lon}"
+                val tv1 = view.findViewById<TextView>(android.R.id.text1); tv1.text = "📍 ${loc.name}"
+                val tv2 = view.findViewById<TextView>(android.R.id.text2); tv2.text = "${loc.lat}, ${loc.lon}"
                 textSize = 15f
             }
             return view
