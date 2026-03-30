@@ -1,4 +1,5 @@
 // fake_gps_hook.cpp
+#include <stdint.h>
 #include <poll.h>
 // Native 层 HOOK - 截获 libc socket 函数以实现定位劫持
 // HOOK 流程:
@@ -359,7 +360,7 @@ static int hook_plt(const char* sym_name, void* new_func, void** old_func) {
 
 // ARM32: 使用 BL 指令
 static uint32_t arm32_bl(void* target, void* from) {
-    uint32_t off = ((uint32_t)target - ((uint32_t)from + 8)) >> 2;
+    uintptr_t off = ((uintptr_t)target - ((uintptr_t)from + 8)) >> 2;
     return 0xEB000000 | (off & 0x00FFFFFF);
 }
 
