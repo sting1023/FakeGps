@@ -71,15 +71,15 @@ class FakeGpsService : Service() {
         }
 
         try {
-            locationManager.addTestProvider(
-                PROVIDER_NAME,
-                false, // requiresNetwork
-                false, // requiresSatellite
-                false, // requiresCell
-                false, // hasMonetaryCost
-                false, // supportsAltitude
-                false  // supportsSpeed
+            // 用反射调用，避免 Kotlin Boolean vs Java boolean varargs 不兼容
+            val method = LocationManager::class.java.getMethod(
+                "addTestProvider", String::class.java,
+                Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType,
+                Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType,
+                Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType
             )
+            method.invoke(locationManager, PROVIDER_NAME,
+                false, false, false, false, false, false)
         } catch (e: SecurityException) {
             Log.e("FakeGpsService", "需要 ACCESS_MOCK_LOCATION 权限，请在开发者选项中开启")
             isRunning = false
