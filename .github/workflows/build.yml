@@ -22,31 +22,27 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install CMake
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.18.1" 2>&1 | tail -3
+
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: gradle-${{ hashFiles('**/*.gradle*') }}
 
-      - name: Pre-check
-        run: |
-          set -e
-          echo "=== File info ==="
-          ls -la gradlew gradle/wrapper/gradle-wrapper.jar
-          file gradlew gradle/wrapper/gradle-wrapper.jar
-          java -version 2>&1
-          echo "=== gradlew content (first 10 lines) ==="
-          head -10 gradlew
+      - name: Pre-check CMake
+        run: ls $ANDROID_HOME/cmake/ 2>/dev/null || echo "cmake dir empty"
 
       - name: Build debug APK
-        run: |
-          set -e
-          bash gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+        run: bash gradlew assembleDebug --no-daemon 2>&1 | tee build.log
         continue-on-error: true
 
       - name: Upload build log
-        uses: actions/upload-artifact@v4
         if: failure() || success()
+        uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
